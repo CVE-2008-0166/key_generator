@@ -1,7 +1,4 @@
-
-
-//#define _XOPEN_SOURCE 500
-
+#include <arpa/inet.h>
 #include <errno.h>
 #include <stdlib.h>
 #include <string.h>
@@ -121,7 +118,14 @@ int main(
 	if ((t_outFile = BIO_new(BIO_s_file())) == NULL)
 		goto done;
 	char t_outFilename[255];
-	sprintf(t_outFilename, "%d.%s.key", g_pid, argv[3]);
+	sprintf(t_outFilename, "%s_%d_%s_%s%s.key", argv[1], g_pid, argv[3],
+		(htonl(0x1234) == 0x1234) ? "be" : "le",
+#ifdef __LP64__
+		"64"
+#else
+		"32"
+#endif
+	);
 	if (!BIO_write_filename(t_outFile, t_outFilename))
 		goto done;
 
