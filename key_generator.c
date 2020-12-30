@@ -119,7 +119,7 @@ int main(
 		goto done;
 	char t_outFilename[255];
 	sprintf(t_outFilename, "%s_%d_%s_%s%s.key", argv[1], g_pid, argv[3],
-		(htonl(0x1234) == 0x1234) ? "be" : "le",
+		((htonl(0x1234) == 0x1234) != (getenv("FLIP_ENDIAN") != NULL)) ? "be" : "le",
 #ifdef __LP64__
 		"64"
 #else
