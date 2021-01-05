@@ -1,3 +1,8 @@
+/* key_generator.c - Debian weak key generator
+ * Written by Rob Stradling
+ * Copyright (C) 2008-2020 Sectigo Limited
+ */
+
 #include <arpa/inet.h>
 #include <errno.h>
 #include <stdlib.h>
@@ -86,7 +91,11 @@ int main(
 
 	/* Configure RNG state */
 	char t_randFilename[1024];
-	sprintf(t_randFilename, "%s/.rnd", getenv("HOME"));
+	if (getenv("RANDFILE"))
+		strcpy(t_randFilename, getenv("RANDFILE"));
+	else
+		sprintf(t_randFilename, "%s/.rnd", getenv("HOME"));
+
 	if (strcmp(argv[3], "nornd") == 0)
 		/* Simulate first runs */
 		(void)remove(t_randFilename);
