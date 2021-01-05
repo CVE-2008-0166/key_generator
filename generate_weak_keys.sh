@@ -12,7 +12,6 @@ if [ -n "$1" ] && [ "$1" -eq "$1" ] 2>/dev/null; then
   if [ $? -eq 0 ]; then
     cd $1
     for (( i=$START_PID; i<=32767; i++ )); do
-      echo "$i"
       echo -n "Generating weak RSA-$1 keys for process ID $i of 32767: "
       echo -n "le64(rnd"
       ../../bin/linux/x86-64/key_generator $1 $i rnd
