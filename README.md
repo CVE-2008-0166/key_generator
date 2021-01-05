@@ -43,8 +43,22 @@ To cleanup both the `key_generator` and bundled OpenSSL builds, run
 make distclean
 ```
 
+### Testing key_generator
+To check that `key_generator` functions correctly in your environment, run
+``` bash
+./run_tests.sh
+```
+You should see the following output:
+```
+Generating weak RSA-2048 keys for process ID 32767 of 32767: le64(rnd,nornd,noreadrnd) le32(rnd,nornd,noreadrnd) be32(rnd,nornd,noreadrnd)
+Generating test blocklist
+Tests Successful
+```
+(IMPORTANT: If you see "Tests FAILED!", then unfortunately `key_generator` will not produce Debian weak keys in your environment).
+
 ### Using the Tools
-To generate all of the Debian weak keys for a particular RSA keysize, run
+
+To use `key_generator` to generate all of the Debian weak keys for a particular RSA keysize, run
 ``` bash
 ./generate_weak_keys.sh <key_size>
 ```
