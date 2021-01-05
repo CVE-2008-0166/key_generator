@@ -13,9 +13,9 @@ It's not an easy task to correctly set up old, vulnerable Debian versions, for a
 This repository provides tools - to generate complete sets of Debian weak keys (for all of the affected architectures), and to generate the corresponding blocklists - that can be run on a modern 64-bit Linux system. The `key_generator` tool uses a bundled version of [OpenSSL 0.9.8f](https://github.com/CVE-2008-0166/key_generator/commit/9fbb1ecbd9fee3a59c829657c639ba663f2706b5) that has been [modified](https://github.com/CVE-2008-0166/key_generator/commit/c39d4c0e82879314f0a44e55f0212bd12c291e3e) to make it vulnerable to CVE-2008-0166. Multiple architectures are simulated thanks to [64-bit Linux being able to execute 32-bit binaries](#Prebuilt-Binaries) and with the help of a [further modification](https://github.com/CVE-2008-0166/key_generator/commit/90078bea3596b1783c4ea5796d7299139c6c0e94) that provides a mechanism to emulate the opposite endianness by reversing the byte order of certain variables used within the affected OpenSSL RNG code.
 
 ## Pregenerated Keys and Blocklists
-The [blocklists](https://github.com/CVE-2008-0166/blocklists) repository contains complete blocklists of Debian weak keys for various RSA keysizes, using the same format as `openssl-vulnkey`.
+The [openssl_blocklists](https://github.com/CVE-2008-0166/openssl_blocklists) repository contains complete blocklists of Debian weak keys for various RSA keysizes, using the same format as `openssl-vulnkey`.
 
-The [keys](https://github.com/CVE-2008-0166/keys) repository contains complete sets of Debian weak keys for various RSA keysizes, using the PKCS#1 private key format. Using these key sets, CAs can implement weak/compromised key checks without having to be tied to the proprietary, RSA-specific format used by `openssl-vulnkey`.
+The [private_keys](https://github.com/CVE-2008-0166/private_keys) repository contains complete sets of Debian weak keys for various RSA keysizes, using the PKCS#1 private key format. Using these key sets, CAs can implement weak/compromised key checks without having to be tied to the proprietary, RSA-specific format used by `openssl-vulnkey`.
 
 ## Key Generator Tools
 
