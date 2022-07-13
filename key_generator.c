@@ -1,6 +1,6 @@
 /* key_generator.c - Debian weak key generator
  * Written by Rob Stradling
- * Copyright (C) 2008-2020 Sectigo Limited
+ * Copyright (C) 2008-2022 Sectigo Limited
  */
 
 #include <arpa/inet.h>
@@ -10,6 +10,8 @@
 #include <unistd.h>
 #include "openssl/bio.h"
 #include "openssl/bn.h"
+#include "openssl/evp.h"
+#include "openssl/ec.h"
 #include "openssl/rand.h"
 #include "openssl/rsa.h"
 
@@ -76,8 +78,10 @@ int main(
 	char** argv
 )
 {
+	int t_returnCode = 1;
+
 	if (argc != 4) {
-		fprintf(stderr, "Usage: %s <key_size_in_bits> <process_id> <rnd|nornd|noreadrnd>\n", argv[0]);
+		fprintf(stderr, "Usage: %s <key_size_in_bits_or_curve_name> <process_id> <rnd|nornd|noreadrnd>\n", argv[0]);
 		exit(1);
 	}
 
@@ -112,15 +116,44 @@ int main(
 	}
 	app_RAND_load_file(NULL);
 
-	/* Generate predictable RSA keypair */
-	BIGNUM* t_publicExponent = BN_new();
-	RSA* t_rsa = RSA_new();
-	if (!t_publicExponent || !t_rsa)
-		goto done;
-	if (!BN_set_word(t_publicExponent, 65537))
-		goto done;
-	if (!RSA_generate_key_ex(t_rsa, atoi(argv[1]), t_publicExponent, NULL))
-		goto done;
+	BIGNUM* t_publicExponent = NULL;
+	RSA* t_rsa = NULL;
+	EC_GROUP* t_group = NULL;
+	EC_KEY* t_ecKey = NULL;
+	if (atoi(argv[1]) > 0) {
+		/* Generate predictable RSA keypair */
+		t_publicExponent = BN_new();
+		t_rsa = RSA_new();
+		if (!t_publicExponent || !t_rsa)
+			goto done;
+		if (!BN_set_word(t_publicExponent, 65537))
+			goto done;
+		if (!RSA_generate_key_ex(t_rsa, atoi(argv[1]), t_publicExponent, NULL))
+			goto done;
+	}
+	else {
+		int t_nid;
+		if (!strcmp(argv[1], "secp256r1"))
+			t_nid = NID_X9_62_prime256v1;
+		else if (!strcmp(argv[1], "secp384r1"))
+			t_nid = NID_secp384r1;
+		else {
+			fprintf(stderr, "'%s' does not denote an RSA key size or a supported elliptic curve!\n", argv[1]);
+			exit(1);
+		}
+
+		/* Generate predictable ECDSA keypair */
+		t_group = EC_GROUP_new_by_curve_name(t_nid);
+		EC_GROUP_set_asn1_flag(t_group, OPENSSL_EC_NAMED_CURVE);
+		EC_GROUP_set_point_conversion_form(t_group, POINT_CONVERSION_UNCOMPRESSED);
+		t_ecKey = EC_KEY_new();
+		if (!t_ecKey)
+			goto done;
+		if (EC_KEY_set_group(t_ecKey, t_group) == 0)
+			goto done;
+		if (!EC_KEY_generate_key(t_ecKey))
+			goto done;
+	}
 
 	/* Create output file */
 	BIO* t_outFile = NULL;
@@ -140,9 +173,15 @@ int main(
 
 	/* Write key to output file */
 	unsigned char* t_key_data = NULL;
-	int t_key_size = i2d_RSAPrivateKey(t_rsa, &t_key_data);
+	int t_key_size = 0;
+	if (t_rsa != NULL)
+		t_key_size = i2d_RSAPrivateKey(t_rsa, &t_key_data);
+	else if (t_ecKey != NULL)
+		t_key_size = i2d_ECPrivateKey(t_ecKey, &t_key_data);
 	if (BIO_write(t_outFile, t_key_data, t_key_size) <= 0)
 		goto done;
+
+	t_returnCode = 0;
 
 done:
 	app_RAND_write_file(NULL);
@@ -155,6 +194,10 @@ done:
 		BN_free(t_publicExponent);
 	if (t_rsa)
 		RSA_free(t_rsa);
+	if (t_group)
+		EC_GROUP_free(t_group);
+	if (t_ecKey)
+		EC_KEY_free(t_ecKey);
 
-	return 0;
+	return t_returnCode;
 }
