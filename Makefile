@@ -10,7 +10,7 @@ distclean: clean
 	cd $(OPENSSLDIR); $(MAKE) clean; rm -f certs/*.0 test/dummytest; git checkout -- Makefile apps/CA.pl crypto/opensslconf.h tools/c_rehash
 
 .openssl_is_built:
-	cd $(OPENSSLDIR); ./config --prefix=. no-asm; $(MAKE)
+	cd $(OPENSSLDIR); ./config --prefix=. no-asm no-idea no-mdc2 no-rc5 zlib; $(MAKE)
 	touch .openssl_is_built
 
 key_generator: .openssl_is_built
