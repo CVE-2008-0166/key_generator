@@ -15,9 +15,11 @@ In 2022 Hanno Böck pointed out that the vulnerable Debian versions also generat
 This repository provides tools - to generate complete sets of Debian weak keys (for all of the affected architectures), and to generate the corresponding blocklists - that can be run on a modern 64-bit Linux system. The `key_generator` tool uses a bundled version of [OpenSSL 0.9.8f](https://github.com/CVE-2008-0166/key_generator/commit/9fbb1ecbd9fee3a59c829657c639ba663f2706b5) that has been [modified](https://github.com/CVE-2008-0166/key_generator/commit/c39d4c0e82879314f0a44e55f0212bd12c291e3e) to make it vulnerable to CVE-2008-0166. Multiple architectures are simulated thanks to [64-bit Linux being able to execute 32-bit binaries](#Prebuilt-Binaries) and with the help of a [further modification](https://github.com/CVE-2008-0166/key_generator/commit/90078bea3596b1783c4ea5796d7299139c6c0e94) that provides a mechanism to emulate the opposite endianness by reversing the byte order of certain variables used within the affected OpenSSL RNG code.
 
 ## Pregenerated Keys and Blocklists
+The [private_keys](https://github.com/CVE-2008-0166/private_keys) repository contains complete sets of Debian weak keys for various RSA keysizes (using the PKCS#1 private key format with public exponent 65537) and EC curves (using the SEC1 private key format). Using these key sets, CAs can implement weak/compromised key checks without having to be tied to the blocklist format used by `openssl-vulnkey`. When designing these key checks, it is important for CAs to note that 65537 is not the only public exponent that a predictable RSA modulus might be used with.
+
 The [openssl_blocklists](https://github.com/CVE-2008-0166/openssl_blocklists) repository contains complete blocklists of Debian weak keys for various RSA keysizes, using the same format as `openssl-vulnkey`. Since this file format only supports RSA, it is not possible to produce compatible blocklists for EC keys.
 
-The [private_keys](https://github.com/CVE-2008-0166/private_keys) repository contains complete sets of Debian weak keys for various RSA keysizes (using the PKCS#1 private key format with public exponent 65537) and EC curves (using the SEC1 private key format). Using these key sets, CAs can implement weak/compromised key checks without having to be tied to the blocklist format used by `openssl-vulnkey`. When designing these key checks, it is important for CAs to note that 65537 is not the only public exponent that a predictable RSA modulus might be used with.
+The [dwk_blocklists](https://github.com/CVE-2008-0166/dwk_blocklists) repository contains complete blocklists of Debian weak keys for various RSA keysizes and ECC curves.
 
 ## Key Generator Tools
 
@@ -70,9 +72,14 @@ To put those keys into a set of .zip files, run
 ./zip_weak_keys.sh <key_size_in_bits_or_curve_name>
 ```
 
-To generate blocklists for those keys that are compatible with `openssl-vulnkey`, run
+To generate blocklists for those keys (RSA only) that are compatible with `openssl-vulnkey`, run
 ``` bash
-./generate_blocklists.sh <key_size_in_bits>
+./generate_vulnkey_blocklists.sh <key_size_in_bits>
+```
+
+To generate blocklists for those keys in a different format that supports both RSA and ECC, build the [dwk_blocklist_generator](https://github.com/CVE-2008-0166/dwk_blocklist_generator) application, then run
+``` bash
+./generate_dwk_blocklists.sh <key_size_in_bits_or_curve_name> <private_keys_directory>
 ```
 
 NOTE: Key and blocklist generation takes a long, long time!
