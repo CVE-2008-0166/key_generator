@@ -77,7 +77,7 @@ To generate blocklists for those keys (RSA only) that are compatible with `opens
 ./generate_vulnkey_blocklists.sh <key_size_in_bits>
 ```
 
-To generate blocklists for those keys in a different format that supports both RSA and ECC, build the [dwk_blocklist_generator](https://github.com/CVE-2008-0166/dwk_blocklist_generator) application, then run
+To generate blocklists for those keys in a different format that supports both RSA and ECC, build the [dwk_blocklist_generator](dwk_blocklist_generator) application, then run
 ``` bash
 ./generate_dwk_blocklists.sh <key_size_in_bits_or_curve_name> <private_keys_directory>
 ```
